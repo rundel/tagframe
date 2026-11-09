@@ -1,0 +1,24 @@
+Package: tagframe
+Title: Embed Rendered HTML Tags in Quarto Slides as Iframes
+Version: 0.1.0
+Authors@R:
+    person("Colin", "Rundel", , "rundel@gmail.com", role = c("aut", "cre"))
+Description: Provides a knitr engine that evaluates a chunk of R code returning
+    htmltools tags (for example bslib components or htmlwidgets) and embeds
+    the rendered result in the knitted document as a self-contained iframe.
+    This keeps Bootstrap and other component CSS isolated from the
+    surrounding reveal.js or HTML document.
+License: MIT + file LICENSE
+URL: https://github.com/rundel/tagframe
+BugReports: https://github.com/rundel/tagframe/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.4.0)
+Imports:
+    bslib,
+    htmltools,
+    jsonlite,
+    knitr,
+    utils
+Config/roxygen2/version: 8.1.1

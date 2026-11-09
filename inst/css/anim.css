@@ -1,0 +1,27 @@
+@keyframes tagframe-width {
+  from { width: var(--tagframe-from); }
+  25%  { width: var(--tagframe-from); }
+  50%  { width: var(--tagframe-to); }
+  75%  { width: var(--tagframe-to); }
+  to   { width: var(--tagframe-from); }
+}
+
+.tagframe-anim-width {
+  animation: tagframe-width var(--tagframe-duration, 6s) infinite;
+  border-right: 2px solid #ddd;
+  padding-right: 1rem;
+  padding-bottom: 3rem;
+}
+
+@keyframes tagframe-height {
+  from { height: var(--tagframe-from); }
+  25%  { height: var(--tagframe-from); }
+  50%  { height: var(--tagframe-to); }
+  75%  { height: var(--tagframe-to); }
+  to   { height: var(--tagframe-from); }
+}
+
+.tagframe-anim-height {
+  animation: tagframe-height var(--tagframe-duration, 6s) infinite;
+  padding-bottom: 3rem;
+}

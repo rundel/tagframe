@@ -13,7 +13,9 @@
 #'
 #' @return The tag `x` with animation classes, CSS variables, and the
 #'   stylesheet dependency attached. `anim_height()` returns `x` inside a
-#'   `<div>` fixed at `to` so content after it does not move.
+#'   `<div>` fixed at `to` so content after it does not move. When `x` is a
+#'   bslib page such as [bslib::page_fillable()], the page body itself is
+#'   animated, which shows how fill items respond to the available height.
 #'
 #' @examples
 #' anim_width(htmltools::div("Hello"), "100%", "33%")
@@ -35,6 +37,10 @@ anim_width = function(x, from, to, duration = "6s") {
 #' @rdname anim_width
 #' @export
 anim_height = function(x, from, to, duration = "6s") {
+  if (inherits(x, "bslib_page")) {
+    return(anim_page_height(x, from, to, duration))
+  }
+
   inner = x |>
     htmltools::tagAppendAttributes(
       class = "tagframe-anim-height",
@@ -50,6 +56,27 @@ anim_height = function(x, from, to, duration = "6s") {
     inner
   ) |>
     htmltools::attachDependencies(anim_dependency(), append = TRUE)
+}
+
+# A bslib page fills the frame, so its body is animated in place rather than
+# being wrapped, which would stop it from being treated as a page
+anim_page_height = function(x, from, to, duration) {
+  rule = paste0(
+    "body { ",
+    htmltools::css(
+      `--tagframe-from` = htmltools::validateCssUnit(from),
+      `--tagframe-to` = htmltools::validateCssUnit(to),
+      `--tagframe-duration` = duration
+    ),
+    " }"
+  )
+  x[[length(x) + 1]] = htmltools::tags$head(
+    htmltools::tags$style(htmltools::HTML(rule))
+  )
+  x[[length(x) + 1]] = htmltools::tags$script(htmltools::HTML(
+    'document.body.classList.add("tagframe-anim-page-height");'
+  ))
+  htmltools::attachDependencies(x, anim_dependency(), append = TRUE)
 }
 
 anim_dependency = function() {

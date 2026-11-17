@@ -20,7 +20,9 @@ pixels.}
 \value{
 The tag \code{x} with animation classes, CSS variables, and the
 stylesheet dependency attached. \code{anim_height()} returns \code{x} inside a
-\verb{<div>} fixed at \code{to} so content after it does not move.
+\verb{<div>} fixed at \code{to} so content after it does not move. When \code{x} is a
+bslib page such as \code{\link[bslib:page_fillable]{bslib::page_fillable()}}, the page body itself is
+animated, which shows how fill items respond to the available height.
 }
 \description{
 Wraps a tag so that its width (or height) cycles between two values with a

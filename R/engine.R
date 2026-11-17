@@ -26,6 +26,14 @@
 #'   when wrapping a non-page result. Defaults to `getOption("tagframe.theme")`
 #'   or `bslib::bs_theme()`.
 #' * `title`: the page title.
+#' * `scale`: a number such as `0.8` that renders the frame at `1 / scale`
+#'   times its size and shrinks it to fit. Use it when a narrow frame would
+#'   trigger a mobile layout, for example `page_fillable()` not filling below
+#'   576px. Requires `height` in absolute units.
+#' * `padding`: padding around a non-page result, a CSS unit or a number of
+#'   pixels, so borders and shadows are not clipped by the iframe edge.
+#'   Defaults to `getOption("tagframe.padding", "0.5rem")`. Results that are
+#'   already a bslib page keep their own padding.
 #'
 #' @param options A list of chunk options, as passed by knitr.
 #'
@@ -69,14 +77,21 @@ eng_tagframe = function(options) {
   page = if (inherits(result, "bslib_page")) {
     result
   } else {
-    bslib::page(result, title = options$title, theme = theme)
+    padding = options$padding %||% getOption("tagframe.padding", "0.5rem")
+    bslib::page(
+      result,
+      title = options$title,
+      theme = theme,
+      style = htmltools::css(padding = htmltools::validateCssUnit(padding))
+    )
   }
 
   out = frame_html(
     page,
     id = options$label,
     width = options$width %||% "100%",
-    height = options$height %||% "100%"
+    height = options$height %||% "100%",
+    scale = options$scale %||% 1
   )
 
   options$results = "asis"
@@ -91,7 +106,7 @@ is_renderable = function(x) {
 # Dependencies already written into the current document, keyed by input file
 emitted = new.env(parent = emptyenv())
 
-frame_html = function(page, id, width, height) {
+frame_html = function(page, id, width, height, scale = 1) {
   rendered = htmltools::renderTags(page)
   deps = htmltools::resolveDependencies(rendered$dependencies)
   dep_ids = vapply(deps, function(d) paste0(d$name, "-", d$version), "")
@@ -116,14 +131,35 @@ frame_html = function(page, id, width, height) {
     body = as.character(rendered$html)
   )
 
+  width = htmltools::validateCssUnit(width)
+  height = htmltools::validateCssUnit(height)
+  scaled = !isTRUE(all.equal(scale, 1))
+
+  # A scaled frame is laid out larger by 1 / scale and shrunk back with a
+  # transform, so its page sees a wider viewport than the space it occupies
   frame = htmltools::tags$iframe(
     `data-tagframe` = id,
     `data-tagframe-deps` = paste(dep_ids, collapse = " "),
-    width = htmltools::validateCssUnit(width),
-    height = htmltools::validateCssUnit(height),
-    style = "border: none;",
+    width = if (!scaled) width,
+    height = if (!scaled) height,
+    style = htmltools::css(
+      border = "none",
+      width = if (scaled) paste0("calc(", width, " / ", scale, ")"),
+      height = if (scaled) paste0("calc(", height, " / ", scale, ")"),
+      transform = if (scaled) paste0("scale(", scale, ")"),
+      `transform-origin` = if (scaled) "top left",
+      `max-width` = if (scaled) "none",
+      `max-height` = if (scaled) "none"
+    ),
     scrolling = "no"
   )
+
+  if (scaled) {
+    frame = htmltools::div(
+      style = htmltools::css(width = width, height = height, overflow = "hidden"),
+      frame
+    )
+  }
 
   html = c(
     if (first) runtime_script(),
@@ -161,11 +197,20 @@ inline_dependency = function(dep) {
   }, "")
 
   scripts = dep$script
-  if (is.list(scripts)) {
-    scripts = vapply(scripts, function(s) s$src, "")
+  if (!is.list(scripts)) {
+    scripts = lapply(scripts, function(f) list(src = f))
   }
-  js = vapply(scripts, function(f) {
-    paste0("<script>", gsub("</script", "<\\/script", read(f), fixed = TRUE), "</script>")
+  # Attributes such as type = "module" change when a script runs, which
+  # web components rely on, so they are kept on the inlined tag
+  js = vapply(scripts, function(script) {
+    attrs = script[setdiff(names(script), c("src", "defer", "async", "integrity", "crossorigin"))]
+    attrs = if (length(attrs)) {
+      paste0(" ", names(attrs), '="', htmltools::htmlEscape(unlist(attrs), attribute = TRUE), '"', collapse = "")
+    } else {
+      ""
+    }
+    code = gsub("</script", "<\\/script", read(script$src), fixed = TRUE)
+    paste0("<script", attrs, ">", code, "</script>")
   }, "")
 
   paste(c(meta, css, js, dep$head), collapse = "\n")

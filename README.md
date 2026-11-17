@@ -36,12 +36,14 @@ evaluates the code, wraps the result in `bslib::page()` (unless it already is a 
 
 ### Chunk options
 
-| Option   | Description                                                      | Default                                       |
-|----------|------------------------------------------------------------------|-----------------------------------------------|
-| `height` | Iframe height, a CSS unit or number of pixels                    | `"100%"`                                      |
-| `width`  | Iframe width, a CSS unit or number of pixels                     | `"100%"`                                      |
-| `theme`  | R code (as a string) evaluating to a `bslib::bs_theme()`         | `getOption("tagframe.theme")` or `bs_theme()` |
-| `title`  | Page title                                                       | none                                          |
+| Option    | Description                                                      | Default                                           |
+|-----------|------------------------------------------------------------------|---------------------------------------------------|
+| `height`  | Iframe height, a CSS unit or number of pixels                    | `"100%"`                                          |
+| `width`   | Iframe width, a CSS unit or number of pixels                     | `"100%"`                                          |
+| `theme`   | R code (as a string) evaluating to a `bslib::bs_theme()`         | `getOption("tagframe.theme")` or `bs_theme()`     |
+| `title`   | Page title                                                       | none                                              |
+| `padding` | Space around a non-page result, a CSS unit or number of pixels   | `getOption("tagframe.padding")` or `"0.5rem"`     |
+| `scale`   | Render at `1 / scale` size and shrink to fit (wider viewport)    | `1`                                               |
 
 The usual knitr and Quarto options (`echo`, `label`, `output-location`, ...) work as normal.
 

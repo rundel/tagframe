@@ -25,3 +25,9 @@
   animation: tagframe-height var(--tagframe-duration, 6s) infinite;
   padding-bottom: 3rem;
 }
+
+.tagframe-anim-page-height {
+  animation: tagframe-height var(--tagframe-duration, 6s) infinite;
+  border-bottom: 2px solid #ddd;
+  box-sizing: border-box;
+}

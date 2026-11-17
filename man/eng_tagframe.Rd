@@ -41,6 +41,14 @@ Defaults are \code{"100\%"}.
 when wrapping a non-page result. Defaults to \code{getOption("tagframe.theme")}
 or \code{bslib::bs_theme()}.
 \item \code{title}: the page title.
+\item \code{scale}: a number such as \code{0.8} that renders the frame at \code{1 / scale}
+times its size and shrinks it to fit. Use it when a narrow frame would
+trigger a mobile layout, for example \code{page_fillable()} not filling below
+576px. Requires \code{height} in absolute units.
+\item \code{padding}: padding around a non-page result, a CSS unit or a number of
+pixels, so borders and shadows are not clipped by the iframe edge.
+Defaults to \code{getOption("tagframe.padding", "0.5rem")}. Results that are
+already a bslib page keep their own padding.
 }
 }
 \examples{
